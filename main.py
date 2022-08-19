@@ -112,7 +112,7 @@ def compiler(model, x_train, y_train):  # , x_validate, y_validate):
     history = model.fit(
         x_train,
         y_train,
-        epochs=300,
+        epochs=100,
         batch_size=256,
         # validation_data=(x_validate, y_validate),
         workers=cpus,
@@ -136,7 +136,7 @@ def modeler(train):
     # x_validate, y_validate, _scaler = scale_data(validate)
 
     # Initialize the model architecture
-    model = model_architect(train, units=200, drp=0.2)
+    model = model_architect(train, units=200, drp=0.1)
 
     # Train the model
     model, history = compiler(model, x_train, y_train)  # , x_validate, y_validate)
@@ -192,16 +192,26 @@ def statistics(_time, y_test, y_pred):
 
     return data
 
-
+ress = pd.read_csv(os.path.join(ROOT_DIR,'output.csv'))
+ress['station'] = ress['station'].apply(lambda x: x.split('/')[-1])
 res = []
+errors = []
 for _filename in tqdm([os.path.join(ROOT_DIR, 'MOPEX_TS_Ach', e) for e in os.listdir(os.path.join(ROOT_DIR,'MOPEX_TS_Ach'))]):
-    start = time.time()
-    # _filename ='1048000.csv'
-    data = load_data(_filename)
-    train, test = split_data(data)
-    x_train, y_train, model, history = modeler(train)
-    x_test, y_test, y_pred, test = predictor(test, model)
+    if _filename.split('/')[-1].split('.')[0] not in list(ress['station']):
+        try:
+            start = time.time()
+            # _filename ='1048000.csv'
+            data = load_data(_filename)
+            train, test = split_data(data)
+            x_train, y_train, model, history = modeler(train)
+            x_test, y_test, y_pred, test = predictor(test, model)
 
-    stats = statistics(_filename, test['Q'],test['pred_Q'])
-    print(" Time taken for station ", time.time() - start)
-    res.append(stats)
+            stats = statistics(_filename, test['Q'],test['pred_Q'])
+            print(" Time taken for station ", time.time() - start)
+            res.append(stats)
+
+            DataFrame(res).to_csv(os.path.join(ROOT_DIR,'output.csv'))
+        except:
+            print("Error with station ", _filename.split('/')[-1])
+            errors.append(_filename.split('/')[-1])
+            pass
