@@ -177,14 +177,16 @@ def statistics(_time, y_test, y_pred):
     :return: dictionnary of statistics
     """
     kge, r, alpha, beta = he.evaluator(he.kge, y_pred, y_test)
+    pbias_ = he.evaluator(he.pbias, y_pred, y_test)
     data = {
         'station': _filename.split('.')[0],
         'MAE': mean_absolute_error(y_test, y_pred),
         'R_squared': r2_score(y_test, y_pred),
         'MSE_squared': mean_squared_error(y_test, y_pred),
-        'MSE': mean_squared_error(y_test, y_pred, squared=False),
+        'RMSE': mean_squared_error(y_test, y_pred, squared=True),
         'NSE': he.evaluator(he.nse, y_pred, y_test)[0],
         'KGE': kge[0],
+        "PBias" : pbias_[0],
         'r': r[0],
         'Alpha': alpha[0],
         'Beta': beta[0]
@@ -196,7 +198,7 @@ ress = pd.read_csv(os.path.join(ROOT_DIR,'output.csv'))
 ress['station'] = ress['station'].apply(lambda x: x.split('/')[-1])
 res = []
 errors = []
-for _filename in tqdm([os.path.join(ROOT_DIR, 'MOPEX_TS_Ach', e) for e in os.listdir(os.path.join(ROOT_DIR,'MOPEX_TS_Ach'))]):
+for _filename in tqdm([os.path.join(ROOT_DIR, 'MOPEX_TS_GF_Ach', e) for e in os.listdir(os.path.join(ROOT_DIR,'MOPEX_TS_GF_Ach'))]):
     if _filename.split('/')[-1].split('.')[0] not in list(ress['station']):
         try:
             start = time.time()
