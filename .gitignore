@@ -8,7 +8,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-output.csv
 .~lock.output.csv#
 .idea
 build/
